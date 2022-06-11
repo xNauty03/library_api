@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\Book;
+use App\Entity\Book\Book;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,9 +16,12 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class BookRepository extends ServiceEntityRepository
 {
+    private $registry;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Book::class);
+        $this->registry = $registry;
     }
 
     public function add(Book $entity, bool $flush = false): void
@@ -39,38 +42,25 @@ class BookRepository extends ServiceEntityRepository
         }
     }
 
-//    public function findByAuthor(string $author){
-//        $entityManager = $this->getEntityManager();
-//
-//        $query = $entityManager->createQuery(
-//            "SELECT * FROM book WHERE 'author' LIKE $author"
-//        );
-//        return $query->getResult();
-//    }
+    //-------------------------------------------------------------------------------
+
+    public function findNumberOfBooks(string $title)
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $sql = "SELECT COUNT(id) FROM Book WHERE title LIKE :title AND is_borrowed LIKE false";
+        $statement = $connection->prepare($sql);
+        $resultSet = $statement->executeQuery(['title'=>$title]);
+
+        return $resultSet->fetchAllAssociative();
+    }
 
 
-//    /**
-//     * @return Book[] Returns an array of Book objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('b')
-//            ->andWhere('b.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('b.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findShorterThan(int $number){
+        $connection = $this->getEntityManager()->getConnection();
+        $sql = "SELECT * FROM Book WHERE number_of_pages <= :number";
+        $statement = $connection->prepare($sql);
+        $resultSet = $statement->executeQuery(['number'=>$number]);
 
-//    public function findOneBySomeField($value): ?Book
-//    {
-//        return $this->createQueryBuilder('b')
-//            ->andWhere('b.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        return $resultSet->fetchAllAssociative();
+    }
 }

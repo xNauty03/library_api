@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 
-use App\Entity\Book;
+use App\Entity\Book\Book;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -23,12 +23,11 @@ class GetByAuthorController extends AbstractController
             ['author'=>$author],
         );
 
-//        if(!$book){
-//            throw $this->createNotFoundException("Wiadomość");
-//        }
-//        else{
-//            return $book;
-//        }
-        return $book;
+        if(!$book){
+            throw $this->createNotFoundException("Nie posiadamy książek danego autora.");
+        }
+        else{
+            return $book;
+        }
     }
 }
